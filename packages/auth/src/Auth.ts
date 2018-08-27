@@ -288,12 +288,12 @@ export default class AuthClass {
      * @param {String} password - The password of the username
      * @return - A promise resolves the CognitoUser
      */
-    public signIn(username: string, password?: string): Promise<any> {
+    public signIn(username: string, password?: string, customAuth?: boolean): Promise<any> {
         if (!this.userPool) { return Promise.reject('No userPool'); }
         if (!username) { return Promise.reject('Username cannot be empty'); }
 
         if (password) {
-            return this.signInWithPassword(username, password);
+            return this.signInWithPassword(username, password, customAuth);
         } else {
             return this.signInWithoutPassword(username);
         }
@@ -378,8 +378,11 @@ export default class AuthClass {
      * @param {String} password - The password of the username
      * @return - A promise resolves the CognitoUser object if success or mfa required
      */
-    private signInWithPassword(username: string, password: string): Promise<any> {
+    private signInWithPassword(username: string, password: string, customAuth: boolean = false): Promise<any> {
         const user = this.createCognitoUser(username);
+        if (customAuth) {
+            user.setAuthenticationFlowType('CUSTOM_AUTH');
+        }
         const authDetails = new AuthenticationDetails({
             Username: username,
             Password: password
